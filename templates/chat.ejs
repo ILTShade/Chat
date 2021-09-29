@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <!-- style -->
+    <style>
+      #header {
+        position: relative;
+        background-color: antiquewhite;
+      }
+      #header_text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: 0%;
+        margin-left: 0%;
+        white-space: pre;
+        height: fit-content;
+        width: fit-content;
+        background-color: aqua;
+        font-size: 12px;
+
+      }
+		</style>
+    <!-- scripts -->
+    <script>
+      // update function
+      function update() {
+        // get header and update header height and width
+        var js_screen = document.body;
+        var js_header = document.getElementById("header");
+        js_header.style.height = js_screen.clientHeight * 0.05 + "px";
+        js_header.style.width = js_screen.clientWidth * 1 + "px";
+
+        // js_header_text.scrollwidth and update font size
+        var js_header_text = document.getElementById("header_text");
+        var js_header_text_style = window.getComputedStyle(js_header_text);
+        console.assert(js_header_text_style.fontSize.slice(-2) === "px", "should end with px");
+        var js_header_text_font_size = parseInt(js_header_text_style.fontSize);
+        var font_height = (js_header.clientHeight / js_header_text.scrollHeight) * js_header_text_font_size
+        var font_width = (js_header.clientWidth / js_header_text.scrollWidth) * js_header_text_font_size;
+        var now_font_size = Math.min(font_height, font_width) * 0.8;
+        // set
+        js_header_text.style.fontSize = now_font_size + "px";
+        js_header_text.style.marginTop = (0 - js_header_text.scrollHeight * 0.5) + "px";
+        js_header_text.style.marginLeft = (0 - js_header_text.scrollWidth * 0.5) + "px";
+      }
+      // add function
+      window.onload = update;
+      window.onresize = update;
+    </script>
+  </head>
+  <body style="height: 100%;">
+    <div id="header">
+      <div id="header_text">Web Chat</div>
+    </div>
+  </body>
+
+</html>
