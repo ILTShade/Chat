@@ -6,98 +6,95 @@
     <!-- style -->
     <style>
       body * {
-        box-sizing: border-box;
         margin: auto;
+        font-size: 12px;
+        border: 5px solid #e9e9e9;
+        border-radius: 10px;
       }
       #header {
         position: relative;
+        border: 0px;
       }
       #header_text {
         position: absolute;
         top: 50%;
         left: 50%;
-        margin-top: 0%;
-        margin-left: 0%;
+        transform: translate(-50%, -50%);
         white-space: pre;
         height: fit-content;
         width: fit-content;
-        font-size: 12px;
+        border: 0px;
       }
       #message_list {
         position: relative;
         background-color: antiquewhite;
-        border: 5px solid #e9e9e9;
-        border-radius: 10px;
       }
       #input {
         position: absolute;
         bottom: 0%;
         left: 0%;
         height: 5%;
-        width: 90%;
-        line-height: 5%;
-        padding: 0%;
-        box-sizing: content-box;
-        border: 5px solid #e9e9e9;
-        border-radius: 10px;
       }
       #button {
         position: absolute;
         bottom: 0%;
+        right: 0%;
         background-color: cornflowerblue;
         height: fit-content;
         width: fit-content;
-        padding: 0px;
-        box-sizing: content-box;
-        border: 5px solid #e9e9e9;
-        border-radius: 10px;
       }
 		</style>
     <!-- scripts -->
     <script>
+      function set_height_width(item_id, height, height_scale, width, width_scale) {
+        var js_object = document.getElementById(item_id);
+        var js_object_style = window.getComputedStyle(js_object);
+        js_object.style.height = (height * height_scale - (js_object.offsetHeight - parseFloat(js_object_style.height))) + "px";
+        js_object.style.width = (width * width_scale - (js_object.offsetWidth - parseFloat(js_object_style.width))) + "px";
+      }
+      // height_flag true for inner, false for apposition
+      // width flag for change width or not
+      function set_font_size(item_id, target_id, scale, height_flag, width_flag) {
+        var js_item = document.getElementById(item_id);
+        var js_item_style = window.getComputedStyle(js_item);
+        var js_target = document.getElementById(target_id);
+        var js_target_style = window.getComputedStyle(js_target);
+        if (height_flag) {
+          var font_height = (js_target.clientHeight - js_item.offsetHeight) + parseFloat(js_item_style.fontSize);
+        }
+        else {
+          var font_height = (js_target.offsetHeight - js_item.offsetHeight) + parseFloat(js_item_style.fontSize);
+        }
+        if (width_flag) {
+          var extra_width = js_item.scrollWidth - parseFloat(js_item_style.width) + 2 * parseFloat(js_item_style.border);
+          var font_width = (parseFloat(js_target_style.width) - extra_width) / parseFloat(js_item_style.width) * parseFloat(js_item_style.fontSize);
+        }
+        else {
+          var font_width = font_height;
+        }
+        js_item.style.fontSize = Math.min(font_height, font_width) * scale + "px";
+      }
       // update function
       function update() {
-        // get header and update header and message list height and width
-        var js_screen_height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-        var js_screen_width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        var js_header = document.getElementById("header");
-        js_header.style.height = js_screen_height * 0.05 + "px";
-        js_header.style.width = js_screen_width * 1 + "px";
-        var js_message_list = document.getElementById("message_list");
-        js_message_list.style.height = js_screen_height * 0.9 + "px";
-        js_message_list.style.width = js_screen_width * 0.7 + "px";
+        // set header and message_list position
+        var js_screen_height = window.innerHeight;
+        var js_screen_width = window.innerWidth;
+        set_height_width("header", js_screen_height, 0.05, js_screen_width, 0.99);
+        set_height_width("message_list", js_screen_height, 0.9, js_screen_width, 0.7);
 
-        // js_header_text.scrollwidth and update font size
-        var js_header_text = document.getElementById("header_text");
-        var js_header_text_style = window.getComputedStyle(js_header_text);
-        console.assert(js_header_text_style.fontSize.slice(-2) === "px", "should end with px");
-        var js_header_text_font_size = parseInt(js_header_text_style.fontSize);
-        var font_height = (js_header.clientHeight / js_header_text.scrollHeight) * js_header_text_font_size
-        var font_width = (js_header.clientWidth / js_header_text.scrollWidth) * js_header_text_font_size;
-        var now_font_size = Math.min(font_height, font_width) * 0.8;
-        // set
-        js_header_text.style.fontSize = now_font_size + "px";
-        js_header_text.style.marginTop = (0 - js_header_text.scrollHeight * 0.5) + "px";
-        js_header_text.style.marginLeft = (0 - js_header_text.scrollWidth * 0.5) + "px";
-
-        // update input and button
+        // set font size for header_text and button
+        set_font_size("header_text", "header", 1.0, true, true);
+        set_font_size("button", "input", 1.0, false, false);
         var js_input = document.getElementById("input");
-        var js_button = document.getElementById("button");
         js_input.style.fontSize = js_input.clientHeight * 0.7 + "px";
-        var js_button_style = window.getComputedStyle(js_button);
-        var js_input_style = window.getComputedStyle(js_input);
-        js_button.style.fontSize = (js_input.clientHeight / js_button.clientHeight) * parseInt(js_button_style.fontSize) + "px";
-        js_input.style.width = (js_message_list.clientWidth - js_button.offsetWidth - parseFloat(js_input_style.borderWidth)) + "px";
-        js_button.style.left = js_input.offsetWidth + "px";
-
-        //js_button.style.fontSize = js_button.clientHeight + "px";
+        js_input.style.right = document.getElementById("button").offsetWidth + "px";
       }
       // add function
       window.onload = update;
       window.onresize = update;
     </script>
   </head>
-  <body style="height: 99%; margin: auto;">
+  <body style="height: 99%;">
     <div id="header">
       <div id="header_text">Web Chat</div>
     </div>
