@@ -53,8 +53,8 @@ const add_user = async (user_code, nick_name) => {
 
 // add message
 const add_message = async (user_code, date, message) => {
-  let init_table = "CREATE TABLE IF NOT EXISTS `messages`(`code` varchar(64), `time` varchar(64) NOT NULL, `message` varchar(256) NOT NULL)DEFAULT CHARSET=utf8;";
-  let insert = util.format("INSERT INTO `messages` (`code`, `time`, `message`) VALUES('%s', '%s', '%s');", user_code, date, message);
+  let init_table = "CREATE TABLE IF NOT EXISTS `messages`(`code` varchar(64), `date` varchar(64) NOT NULL, `message` varchar(256) NOT NULL)DEFAULT CHARSET=utf8;";
+  let insert = util.format("INSERT INTO `messages` (`code`, `date`, `message`) VALUES('%s', '%s', '%s');", user_code, date, message);
   await query(init_table);
   res = await query(insert);
   return res;
@@ -72,8 +72,17 @@ const find_message = async () => {
   return res;
 }
 
+// find nick names
+const find_nick_name = async (user_code) => {
+  let name = util.format("select `name` from `users` where `code`='%s';", user_code);
+  res = await query(name);
+  return res;
+}
+
+
 module.exports = {
   add_user: add_user,
   add_message: add_message,
   find_message: find_message,
+  find_nick_name: find_nick_name
 }

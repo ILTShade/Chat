@@ -9,6 +9,7 @@ const public_ip = require("public-ip");
 const md5 = require("md5");
 const moment = require("moment");
 const database = require("./src/database");
+const names = require("./src/names");
 
 // get ip
 var ip = "0.0.0.0";
@@ -36,53 +37,61 @@ app.set("view engine", "ejs");
 
 // router
 app.get('/', (req, res) => {
-  res.render("chat", {"ip": ip, "port": server.address().port});
+  public_ip.v4().then((ip) => {
+    res.render("chat", {"ip": ip, "port": server.address().port});
+  })
 });
 function momentum() {
   var time = Date.now();
   return moment(time).format("YYYYMMDD-HH:mm:ss");
 };
 const ws_clients = new Array();
-function transfer_message(user_code, date, msg) {
-  for (let i=0; i<ws_clients.length; i++) {
-    // console.log(ws_clients[i]);
-    if (ws_clients[i].readyState == 1) {
-      data = JSON.stringify({
-        "user_code": user_code,
-        "time": date,
-        "msg": msg
+const nick_names = {};
+function transfer_one_message(ws, user_code, date, message) {
+  if (user_code in nick_names) {
+    nick_name = nick_names[user_code];
+    transfer(ws, nick_name, date, message);
+  } else {
+    database.find_nick_name(user_code).then((res) => {
+      nick_names[user_code] = res[0]["name"];
+      transfer(ws, res[0]["name"], date, message);
+    })
+  }
+  function transfer(ws, nick_name, date, message) {
+    if (ws.readyState == 1) {
+      transfer_data = JSON.stringify({
+        "nick_name": nick_name,
+        "date": date,
+        "content": message
       });
-      // console.log(data);
-      ws_clients[i].send(data);
+      ws.send(transfer_data);
     }
   }
+    // console.log(ws_clients[i]);
 };
 app.ws("/web_socket", function (ws, req) {
   // init
   let user_id = req.ip.toString() + momentum();
   let user_code = md5(user_id);
   access_log_stream.write(`init user id ${user_id} as ${user_code}\n`);
-  database.add_user(user_code, user_code);
+  nick_name = names.get_name();
+  database.add_user(user_code, nick_name);
   ws_clients.push(ws);
+  nick_names[user_code] = nick_name;
   // on message
-  ws.on("message", function(msg) {
-    access_log_stream.write(`${momentum()}, ${user_code} send message: ${msg}\n`);
+  ws.on("message", function(message) {
+    access_log_stream.write(`${momentum()}, ${user_code} send message: ${message}\n`);
     let date = new Date().toLocaleString();
-    database.add_message(user_code, date, msg).then((res) => {
-      transfer_message(user_code, date, msg);
+    database.add_message(user_code, date, message).then((res) => {
+      for (let i=0; i<ws_clients.length; i++) {
+        transfer_one_message(ws_clients[i], user_code, date, message);
+      }
     });
   })
   // init all message
   database.find_message().then((messages) => {
     for (let i=0; i<messages.length; i++){
-      data = JSON.stringify({
-        "user_code": messages[i]["code"],
-        "time": messages[i]["time"],
-        "msg": messages[i]["message"],
-      });
-      // console.log(messages[i]);
-      // console.log(data);
-      ws.send(data);
+      transfer_one_message(ws, messages[i]["code"], messages[i]["time"], messages[i]["message"]);
     }
   });
 });
