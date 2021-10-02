@@ -38,7 +38,7 @@ const query = async (sql) => {
 
 // add user
 const add_user = async (user_code, nick_name) => {
-  let init_table = "CREATE TABLE IF NOT EXISTS `users`(`code` varchar(64) PRIMARY KEY, `name` varchar(64) NOT NULL);";
+  let init_table = "CREATE TABLE IF NOT EXISTS `users`(`code` varchar(64) PRIMARY KEY, `name` varchar(64) NOT NULL)DEFAULT CHARSET=utf8;";
   let exist = "select count(*) from `users` where `code`='${user_code}';";
   let insert = util.format("INSERT INTO `users` (`code`, `name`) VALUES('%s', '%s');", user_code, nick_name);
   let update = util.format("UPDATE `users` SET `name`='%s' where `code`='%s';", user_code, nick_name);
@@ -53,13 +53,27 @@ const add_user = async (user_code, nick_name) => {
 
 // add message
 const add_message = async (user_code, date, message) => {
-  let init_table = "CREATE TABLE IF NOT EXISTS `messages`(`code` varchar(64), `time` varchar(64) NOT NULL, `message` varchar(256) NOT NULL);";
+  let init_table = "CREATE TABLE IF NOT EXISTS `messages`(`code` varchar(64), `time` varchar(64) NOT NULL, `message` varchar(256) NOT NULL)DEFAULT CHARSET=utf8;";
   let insert = util.format("INSERT INTO `messages` (`code`, `time`, `message`) VALUES('%s', '%s', '%s');", user_code, date, message);
   await query(init_table);
   res = await query(insert);
+  return res;
+}
+
+// find all messages
+const find_message = async () => {
+  let exist = "SHOW TABLES LIKE '%messages%';";
+  exist_flag = await query(exist);
+  if (exist_flag.length == 0) {
+    return [];
+  }
+  let find = "SELECT * from `messages`;"
+  res = await query(find);
+  return res;
 }
 
 module.exports = {
   add_user: add_user,
-  add_message: add_message
+  add_message: add_message,
+  find_message: find_message,
 }

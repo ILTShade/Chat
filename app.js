@@ -68,9 +68,23 @@ app.ws("/web_socket", function (ws, req) {
   ws.on("message", function(msg) {
     access_log_stream.write(`${momentum()}, ${user_code} send message: ${msg}\n`);
     let date = new Date().toLocaleString();
-    database.add_message(user_code, date, msg);
-    transfer_message(user_code, date, msg);
+    database.add_message(user_code, date, msg).then((res) => {
+      transfer_message(user_code, date, msg);
+    });
   })
+  // init all message
+  database.find_message().then((messages) => {
+    for (let i=0; i<messages.length; i++){
+      data = JSON.stringify({
+        "user_code": messages[i]["code"],
+        "time": messages[i]["time"],
+        "msg": messages[i]["message"],
+      });
+      // console.log(messages[i]);
+      // console.log(data);
+      ws.send(data);
+    }
+  });
 });
 
 // 404 error
