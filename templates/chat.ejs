@@ -37,7 +37,7 @@
         right: 0%;
         overflow: scroll;
       }
-      .message_div {
+      .message_div_left {
         position: relative;
         margin-bottom: 5px;
         margin-left: 3px;
@@ -45,6 +45,17 @@
         width: fit-content;
         max-width: 80%;
         word-wrap: break-word;
+        background-color: azure;
+      }
+      .message_div_right {
+        position: relative;
+        margin-bottom: 5px;
+        margin-right: 3px;
+        height: auto;
+        width: fit-content;
+        max-width: 80%;
+        word-wrap: break-word;
+        background-color: azure;
       }
       #input {
         position: absolute;
@@ -67,6 +78,7 @@
       var message_div_ratio = 0.05;
       var max_message = 100;
       var web_socket;
+      var your_name;
       function set_height_width(item_id, height, height_scale, width, width_scale) {
         var js_object = document.getElementById(item_id);
         var js_object_style = window.getComputedStyle(js_object);
@@ -138,8 +150,12 @@
         var js_message_content = document.getElementById("message_content");
         var new_div = document.createElement("div");
         new_div.setAttribute("id", Date.parse(new Date()).toString());
-        new_div.setAttribute("class", "message_div");
         new_div.setAttribute("style", "font-size: " + js_message_content.clientHeight * message_div_ratio + "px");
+        if (nick_name == your_name) {
+          new_div.setAttribute("class", "message_div_right");
+        } else {
+          new_div.setAttribute("class", "message_div_left");
+        }
         new_div.innerText = nick_name + ": " + content;
         js_message_content.appendChild(new_div);
         js_message_content.scrollTo(0, js_message_content.scrollHeight);
@@ -171,7 +187,11 @@
       web_socket = new WebSocket("ws://<%=ip%>:<%=port%>/web_socket");
       web_socket.onmessage = function(event) {
         let data = JSON.parse(event.data);
-        add_message(data["nick_name"], data["date"], data["content"]);
+        if ("your_name" in data) {
+          your_name = data["your_name"];
+        } else {
+          add_message(data["nick_name"], data["date"], data["content"]);
+        }
       }
     </script>
   </head>

@@ -67,7 +67,7 @@ function transfer_one_message(ws, user_code, date, message) {
       ws.send(transfer_data);
     }
   }
-    // console.log(ws_clients[i]);
+  // console.log(ws_clients[i]);
 };
 app.ws("/web_socket", function (ws, req) {
   // init
@@ -76,8 +76,12 @@ app.ws("/web_socket", function (ws, req) {
   access_log_stream.write(`init user id ${user_id} as ${user_code}\n`);
   nick_name = names.get_name();
   database.add_user(user_code, nick_name);
+
+  // set id and user
   ws_clients.push(ws);
   nick_names[user_code] = nick_name;
+  ws.send(JSON.stringify({"your_name": nick_name}));
+
   // on message
   ws.on("message", function(message) {
     access_log_stream.write(`${momentum()}, ${user_code} send message: ${message}\n`);
