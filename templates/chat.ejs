@@ -66,6 +66,7 @@
     <script>
       var message_div_ratio = 0.05;
       var max_message = 100;
+      var web_socket;
       function set_height_width(item_id, height, height_scale, width, width_scale) {
         var js_object = document.getElementById(item_id);
         var js_object_style = window.getComputedStyle(js_object);
@@ -133,27 +134,46 @@
           }
         }
       }
-      function add_message() {
-        var js_input = document.getElementById("input");
-        if (js_input.value.length == 0) {
-          return;
-        }
+      function add_message(value) {
         var js_message_content = document.getElementById("message_content");
         var new_div = document.createElement("div");
         new_div.setAttribute("id", Date.parse(new Date()).toString());
         new_div.setAttribute("class", "message_div");
         new_div.setAttribute("style", "font-size: " + js_message_content.clientHeight * message_div_ratio + "px");
-        new_div.innerHTML = js_input.value;
-        js_input.value = "";
+        new_div.innerText = value;
         js_message_content.appendChild(new_div);
         js_message_content.scrollTo(0, js_message_content.scrollHeight);
         delete_message();
       }
+      function send_message() {
+        var js_input = document.getElementById("input");
+        if (process_value(js_input.value)) {
+          return;
+        }
+        // send message
+        if (typeof(web_socket) == "undefined") {
+          alert("web socket not defined, please input init to init a web socket");
+        }
+        web_socket.send(js_input.value);
+        js_input.value = "";
+      }
       function on_key_press(event) {
         if (event.keyCode == 13) {
-          add_message();
+          send_message();
         }
       }
+      function process_value(value) {
+        if (value.length == 0) {
+          return true
+        }
+        if (value == "init") {
+          // web scoket
+          web_socket = new WebSocket("ws://<%=ip%>:<%=port%>/web_socket");
+          return true
+        }
+        return false
+      }
+      process_value("init");
     </script>
   </head>
   <body style="height: 99%;">
@@ -164,7 +184,7 @@
       <div id="message_content">
       </div>
       <input type="text" id="input", onkeypress="on_key_press(event)">
-      <button id="button" onclick="add_message()">S</button>
+      <button id="button" onclick="send_message()">S</button>
     </div>
   </body>
 
