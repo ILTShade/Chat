@@ -32,7 +32,7 @@
       #message_content {
         position: absolute;
         top: 0%;
-        bottom: 10%;
+        bottom: 15%;
         left: 0%;
         right: 0%;
         overflow: scroll;
@@ -65,7 +65,7 @@
     <!-- scripts -->
     <script>
       var message_div_ratio = 0.05;
-      var max_message = 3;
+      var max_message = 100;
       function set_height_width(item_id, height, height_scale, width, width_scale) {
         var js_object = document.getElementById(item_id);
         var js_object_style = window.getComputedStyle(js_object);
@@ -134,16 +134,25 @@
         }
       }
       function add_message() {
-        var js_message_content = document.getElementById("message_content");
         var js_input = document.getElementById("input");
+        if (js_input.value.length == 0) {
+          return;
+        }
+        var js_message_content = document.getElementById("message_content");
         var new_div = document.createElement("div");
         new_div.setAttribute("id", Date.parse(new Date()).toString());
         new_div.setAttribute("class", "message_div");
         new_div.setAttribute("style", "font-size: " + js_message_content.clientHeight * message_div_ratio + "px");
         new_div.innerHTML = js_input.value;
+        js_input.value = "";
         js_message_content.appendChild(new_div);
         js_message_content.scrollTo(0, js_message_content.scrollHeight);
         delete_message();
+      }
+      function on_key_press(event) {
+        if (event.keyCode == 13) {
+          add_message();
+        }
       }
     </script>
   </head>
@@ -154,8 +163,8 @@
     <div id="message_list">
       <div id="message_content">
       </div>
-      <input type="text" id="input">
-      <button id="button" onclick="add_message()">send</button>
+      <input type="text" id="input", onkeypress="on_key_press(event)">
+      <button id="button" onclick="add_message()">S</button>
     </div>
   </body>
 
