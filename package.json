@@ -12,10 +12,13 @@
     "fs": "0.0.1-security",
     "md5": "^2.3.0",
     "moment": "^2.29.1",
+    "mongodb": "^4.1.2",
     "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
     "public-ip": "^4.0.4",
     "sha256": "^0.2.0",
-    "utf-8-validate": "^5.0.6"
+    "utf-8-validate": "^5.0.6",
+    "util": "^0.12.4"
   },
   "devDependencies": {},
   "scripts": {

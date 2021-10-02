@@ -134,13 +134,13 @@
           }
         }
       }
-      function add_message(value) {
+      function add_message(user_code, time, msg) {
         var js_message_content = document.getElementById("message_content");
         var new_div = document.createElement("div");
         new_div.setAttribute("id", Date.parse(new Date()).toString());
         new_div.setAttribute("class", "message_div");
         new_div.setAttribute("style", "font-size: " + js_message_content.clientHeight * message_div_ratio + "px");
-        new_div.innerText = value;
+        new_div.innerText = msg;
         js_message_content.appendChild(new_div);
         js_message_content.scrollTo(0, js_message_content.scrollHeight);
         delete_message();
@@ -166,14 +166,13 @@
         if (value.length == 0) {
           return true
         }
-        if (value == "init") {
-          // web scoket
-          web_socket = new WebSocket("ws://<%=ip%>:<%=port%>/web_socket");
-          return true
-        }
         return false
       }
-      process_value("init");
+      web_socket = new WebSocket("ws://<%=ip%>:<%=port%>/web_socket");
+      web_socket.onmessage = function(event) {
+        let data = JSON.parse(event.data);
+        add_message(data["user_code"], data["time"], data["msg"]);
+      }
     </script>
   </head>
   <body style="height: 99%;">
